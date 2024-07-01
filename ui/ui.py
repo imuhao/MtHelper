@@ -24,12 +24,21 @@ class Ui_MainWindow(object):
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 604, 21))
         self.menubar.setObjectName("menubar")
+        self.menu = QtWidgets.QMenu(parent=self.menubar)
+        self.menu.setObjectName("menu")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.action1111 = QtGui.QAction(parent=MainWindow)
         self.action1111.setObjectName("action1111")
+        self.addshop = QtGui.QAction(parent=MainWindow)
+        self.addshop.setObjectName("addshop")
+        self.refreshshop = QtGui.QAction(parent=MainWindow)
+        self.refreshshop.setObjectName("refreshshop")
+        self.menu.addAction(self.addshop)
+        self.menu.addAction(self.refreshshop)
+        self.menubar.addAction(self.menu.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -37,7 +46,10 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "美团辅助"))
+        self.menu.setTitle(_translate("MainWindow", "功能"))
         self.action1111.setText(_translate("MainWindow", "1111"))
+        self.addshop.setText(_translate("MainWindow", "添加店铺"))
+        self.refreshshop.setText(_translate("MainWindow", "更新数据"))
 
 
 if __name__ == "__main__":
