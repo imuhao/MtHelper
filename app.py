@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from PyQt6.QtCore import QDate,QFileSystemWatcher
 import urllib3
 from data.request_data import RequestData
+from data.constant import Contants
 
 class MyApp(QtWidgets.QMainWindow):
 
@@ -29,10 +30,10 @@ class MyApp(QtWidgets.QMainWindow):
     def setup_table_widget(self):
         """设置表格控件"""
         header = self.ui.tableWidget.horizontalHeader()
-        self.ui.tableWidget.setColumnCount(3)
+        self.ui.tableWidget.setColumnCount(9)
         self.ui.tableWidget.setRowCount(0)  # 初始行数为0，可以根据需要调整
 
-    def data_load_callback(self,data):
+    def data_load_callback(self,data,shopName):
         if data["code"] !=0:
             return
         shopData = data["data"]
@@ -40,7 +41,7 @@ class MyApp(QtWidgets.QMainWindow):
         dealAmount = shopData["dealAmount"]
         dealAmountValue = dealAmount["amount"] #今日营业额
         dealRelativeCycle = dealAmount["relativeCycle"] #营业额环比
-        dealRankingInterval = dealAmount["rankingInterval"] #排名
+        dealRankingInterval = dealAmount["rankingInterval"] #成交额排名
 
         transactionVolume = shopData["transactionVolume"]
         transactionTurnover = transactionVolume["turnover"] #成交单量
@@ -54,12 +55,49 @@ class MyApp(QtWidgets.QMainWindow):
         refundAmountValue = refundAmount["amount"] #退款金额
         refundRelativeCycle = refundAmount["relativeCycle"] #退款金额环比
 
-        dealAmountValueItem = QtWidgets.QTableWidgetItem(str(dealAmountValue))
-
+    
         row_position = self.ui.tableWidget.rowCount()
         self.ui.tableWidget.insertRow(row_position)
+        
+        #店铺名称
+        shopName = QtWidgets.QTableWidgetItem(str(shopName))
+        self.ui.tableWidget.setItem(row_position, Contants.index_name, shopName)
 
-        self.ui.tableWidget.setItem(row_position, 0, dealAmountValueItem)
+        #营业额
+        dealAmountValueItem = QtWidgets.QTableWidgetItem(str(dealAmountValue))
+        self.ui.tableWidget.setItem(row_position, Contants.index_deal_amount_value, dealAmountValueItem)
+        
+        #营业额环比
+        dealRelativeCycleItem = QtWidgets.QTableWidgetItem(str(dealRelativeCycle))
+        self.ui.tableWidget.setItem(row_position, Contants.index_deal_relative_cycle, dealRelativeCycleItem)
+        
+        #营业额排名
+        dealRankingIntervalItem = QtWidgets.QTableWidgetItem(str(dealRankingInterval))
+        self.ui.tableWidget.setItem(row_position, Contants.index_deal_ranking_interval, dealRankingIntervalItem)
+        
+        #成交单量
+        transactionTurnoverItem = QtWidgets.QTableWidgetItem(str(transactionTurnover))
+        self.ui.tableWidget.setItem(row_position, Contants.index_transaction_turnover, transactionTurnoverItem)
+        
+        #单量环比
+        transactionRelativeCycleItem = QtWidgets.QTableWidgetItem(str(transactionRelativeCycle))
+        self.ui.tableWidget.setItem(row_position, Contants.index_transaction_relative_cycle, transactionRelativeCycleItem)
+              
+        #单均价
+        averagePriceItem = QtWidgets.QTableWidgetItem(str(averagePrice))
+        self.ui.tableWidget.setItem(row_position, Contants.index_average_price, averagePriceItem)
+        
+
+        #退款金额
+        refundAmountValueItem = QtWidgets.QTableWidgetItem(str(refundAmountValue))
+        self.ui.tableWidget.setItem(row_position, Contants.index_refund_amount_value, refundAmountValueItem)
+        
+
+        #退款金额环比
+        refundRelativeCycleItem = QtWidgets.QTableWidgetItem(str(refundRelativeCycle))
+        self.ui.tableWidget.setItem(row_position, Contants.index_refund_relative_cycle, refundRelativeCycleItem)
+        
+
         self.ui.tableWidget.update()
 
          # 判断是否所有任务已经完成
