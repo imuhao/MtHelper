@@ -20,7 +20,7 @@ class Contants:
       index_deal_ranking_interval=3 #营业额排名
       index_transaction_turnover = 4 #成交单量
       index_transaction_relative_cycle =5#单量环比
-      index_average_price = 6 #单均价
+      index_average_price = 6 #订单均价
       index_refund_amount_value = 7 #退款金额
       index_refund_relative_cycle = 8 #退款金额环比
 

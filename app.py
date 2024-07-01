@@ -32,6 +32,15 @@ class MyApp(QtWidgets.QMainWindow):
         header = self.ui.tableWidget.horizontalHeader()
         self.ui.tableWidget.setColumnCount(9)
         self.ui.tableWidget.setRowCount(0)  # 初始行数为0，可以根据需要调整
+        self.ui.tableWidget.setColumnWidth(Contants.index_name, 140)
+        self.ui.tableWidget.setColumnWidth(Contants.index_deal_amount_value, 80)
+        self.ui.tableWidget.setColumnWidth(Contants.index_deal_relative_cycle, 80)
+        self.ui.tableWidget.setColumnWidth(Contants.index_deal_ranking_interval, 80)
+        self.ui.tableWidget.setColumnWidth(Contants.index_transaction_turnover, 80)
+        self.ui.tableWidget.setColumnWidth(Contants.index_transaction_relative_cycle, 80)
+        self.ui.tableWidget.setColumnWidth(Contants.index_average_price, 80)
+        self.ui.tableWidget.setColumnWidth(Contants.index_refund_amount_value, 80)
+        self.ui.tableWidget.setColumnWidth(Contants.index_refund_relative_cycle, 80)
 
     def data_load_callback(self,data,shopName):
         if data["code"] !=0:

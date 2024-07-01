@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1412</width>
-    <height>738</height>
+    <width>810</width>
+    <height>456</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,18 +19,53 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>1351</width>
-      <height>661</height>
+      <width>793</width>
+      <height>400</height>
      </rect>
     </property>
     <column>
      <property name="text">
-      <string>11</string>
+      <string>店铺名称</string>
      </property>
     </column>
     <column>
      <property name="text">
-      <string>22</string>
+      <string>今日营业额</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>营业额环比</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>营业额排名</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>成交单量</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>单量环比</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>订单均价</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>退款金额</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>退款金额环比</string>
      </property>
     </column>
    </widget>
@@ -40,7 +75,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1412</width>
+     <width>810</width>
      <height>21</height>
     </rect>
    </property>
