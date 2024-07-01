@@ -44,11 +44,6 @@
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action1111">
-   <property name="text">
-    <string>1111</string>
-   </property>
-  </action>
   <action name="addshop">
    <property name="text">
     <string>添加店铺</string>
