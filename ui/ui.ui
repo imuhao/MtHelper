@@ -34,11 +34,29 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>功能</string>
+    </property>
+    <addaction name="action1"/>
+    <addaction name="action2"/>
+   </widget>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action1111">
    <property name="text">
     <string>1111</string>
+   </property>
+  </action>
+  <action name="action1">
+   <property name="text">
+    <string>添加店铺</string>
+   </property>
+  </action>
+  <action name="action2">
+   <property name="text">
+    <string>更新数据</string>
    </property>
   </action>
  </widget>
