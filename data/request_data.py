@@ -13,7 +13,6 @@ class RequestData:
 
     def request_data(self,callback):
 
-
         shop_list = config.get_shop_list()
         for shop in shop_list:
             name = shop["name"]
