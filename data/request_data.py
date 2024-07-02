@@ -20,3 +20,4 @@ class RequestData:
             homeDataWork = HomeDataWork(name,cookie)
             homeDataWork.signals.finished.connect(callback)
             self.threadpool.start(homeDataWork)
+    

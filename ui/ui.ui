@@ -6,9 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>810</width>
-    <height>456</height>
+    <width>996</width>
+    <height>504</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>14</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>美团辅助</string>
@@ -19,8 +24,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>793</width>
-      <height>400</height>
+      <width>981</width>
+      <height>421</height>
      </rect>
     </property>
     <column>
@@ -69,14 +74,33 @@
      </property>
     </column>
    </widget>
+   <widget class="QLabel" name="amountCount">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>432</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::RightToLeft</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>810</width>
-     <height>21</height>
+     <width>996</width>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

@@ -1,9 +1,9 @@
 import sys
 from PyQt6 import QtWidgets, QtCore
 from ui.ui import Ui_MainWindow
-
+from ui.number_widget import NumericTableWidgetItem
 from datetime import datetime, timedelta
-from PyQt6.QtCore import QDate,QFileSystemWatcher
+from PyQt6.QtCore import QDate,QFileSystemWatcher,Qt
 import urllib3
 from data.request_data import RequestData
 from data.constant import Contants
@@ -20,27 +20,50 @@ class MyApp(QtWidgets.QMainWindow):
         self.threadpool = QtCore.QThreadPool()
         self.threadpool.setMaxThreadCount(3)
         self.apply_stylesheet()
-        self.setup_ui()
         self.setup_table_widget()
 
 
-        requestData = RequestData()
-        requestData.request_data(self.data_load_callback)
+        self.requestData = RequestData()
+        self.requestData.request_data(self.data_load_callback)
+
+
+    def apply_stylesheet(self):
+        QtWidgets.QApplication.setStyle("Fusion")
+        QtWidgets.QApplication.setPalette(QtWidgets.QApplication.style().standardPalette())
+
+
+    def setup_network(self):
+        # 发起请求时忽略证书验证警告
+        urllib3.disable_warnings()
 
     def setup_table_widget(self):
         """设置表格控件"""
         header = self.ui.tableWidget.horizontalHeader()
         self.ui.tableWidget.setColumnCount(9)
         self.ui.tableWidget.setRowCount(0)  # 初始行数为0，可以根据需要调整
-        self.ui.tableWidget.setColumnWidth(Contants.index_name, 140)
-        self.ui.tableWidget.setColumnWidth(Contants.index_deal_amount_value, 80)
-        self.ui.tableWidget.setColumnWidth(Contants.index_deal_relative_cycle, 80)
-        self.ui.tableWidget.setColumnWidth(Contants.index_deal_ranking_interval, 80)
-        self.ui.tableWidget.setColumnWidth(Contants.index_transaction_turnover, 80)
-        self.ui.tableWidget.setColumnWidth(Contants.index_transaction_relative_cycle, 80)
-        self.ui.tableWidget.setColumnWidth(Contants.index_average_price, 80)
-        self.ui.tableWidget.setColumnWidth(Contants.index_refund_amount_value, 80)
-        self.ui.tableWidget.setColumnWidth(Contants.index_refund_relative_cycle, 80)
+        
+        
+
+        self.ui.tableWidget.setColumnWidth(Contants.index_name, 160)
+        self.ui.tableWidget.setColumnWidth(Contants.index_deal_amount_value, 100)
+        self.ui.tableWidget.setColumnWidth(Contants.index_deal_relative_cycle, 100)
+        self.ui.tableWidget.setColumnWidth(Contants.index_deal_ranking_interval, 100)
+        self.ui.tableWidget.setColumnWidth(Contants.index_transaction_turnover, 100)
+        self.ui.tableWidget.setColumnWidth(Contants.index_transaction_relative_cycle, 100)
+        self.ui.tableWidget.setColumnWidth(Contants.index_average_price, 100)
+        self.ui.tableWidget.setColumnWidth(Contants.index_refund_amount_value, 100)
+        self.ui.tableWidget.setColumnWidth(Contants.index_refund_relative_cycle, 100)
+
+        self.ui.addshop.triggered.connect(self.add_shop)
+        self.ui.refreshshop.triggered.connect(self.refresh_data)
+
+    def add_shop(self):
+        pass
+
+    def refresh_data(self):
+        self.ui.tableWidget.setSortingEnabled(False)
+        self.ui.tableWidget.setRowCount(0)
+        self.requestData.request_data(self.data_load_callback)
 
     def data_load_callback(self,data,shopName):
         if data["code"] !=0:
@@ -73,11 +96,17 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui.tableWidget.setItem(row_position, Contants.index_name, shopName)
 
         #营业额
-        dealAmountValueItem = QtWidgets.QTableWidgetItem(str(dealAmountValue))
+        dealAmountValueItem = NumericTableWidgetItem(str(dealAmountValue))
         self.ui.tableWidget.setItem(row_position, Contants.index_deal_amount_value, dealAmountValueItem)
         
         #营业额环比
         dealRelativeCycleItem = QtWidgets.QTableWidgetItem(str(dealRelativeCycle))
+
+        if "-" in dealRelativeCycle: 
+            dealRelativeCycleItem.setForeground(Qt.GlobalColor.green)
+        else :
+            dealRelativeCycleItem.setForeground(Qt.GlobalColor.red)
+
         self.ui.tableWidget.setItem(row_position, Contants.index_deal_relative_cycle, dealRelativeCycleItem)
         
         #营业额排名
@@ -90,6 +119,10 @@ class MyApp(QtWidgets.QMainWindow):
         
         #单量环比
         transactionRelativeCycleItem = QtWidgets.QTableWidgetItem(str(transactionRelativeCycle))
+        if "-" in transactionRelativeCycle: 
+            transactionRelativeCycleItem.setForeground(Qt.GlobalColor.green)
+        else :
+            transactionRelativeCycleItem.setForeground(Qt.GlobalColor.red)
         self.ui.tableWidget.setItem(row_position, Contants.index_transaction_relative_cycle, transactionRelativeCycleItem)
               
         #单均价
@@ -104,31 +137,42 @@ class MyApp(QtWidgets.QMainWindow):
 
         #退款金额环比
         refundRelativeCycleItem = QtWidgets.QTableWidgetItem(str(refundRelativeCycle))
+        if "-" in refundRelativeCycle: 
+            refundRelativeCycleItem.setForeground(Qt.GlobalColor.green)
+        else :
+            refundRelativeCycleItem.setForeground(Qt.GlobalColor.red)
+
         self.ui.tableWidget.setItem(row_position, Contants.index_refund_relative_cycle, refundRelativeCycleItem)
-        
-
         self.ui.tableWidget.update()
-
          # 判断是否所有任务已经完成
-        active_threads = self.threadpool.activeThreadCount()
+        active_threads = self.requestData.threadpool.activeThreadCount()
         if active_threads == 0:
-            print("已加载完成")
+            print(str(self.ui.tableWidget.rowCount()))
+            # 启用排序
+            self.ui.tableWidget.setSortingEnabled(True)
+            self.ui.tableWidget.sortItems(1, Qt.SortOrder.DescendingOrder)  # 按第二列（Amount 列）排序
+            self.calculate_total()
+            
 
-    def apply_stylesheet(self):
-        QtWidgets.QApplication.setStyle("Fusion")
-        QtWidgets.QApplication.setPalette(QtWidgets.QApplication.style().standardPalette())
+    def calculate_total(self):
+        total = 0
+        for row in range(self.ui.tableWidget.rowCount()):
+            item = self.ui.tableWidget.item(row, Contants.index_deal_amount_value)
+            if item is not None :
+                total += float(item.text())
 
+        self.ui.amountCount.setText(f'总营业额: {total:.2f}')
 
-    def setup_network(self):
-        # 发起请求时忽略证书验证警告
-        urllib3.disable_warnings()
-
-    def setup_ui(self):
-        pass
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
+    # 设置全局字体大小
+    app.setStyleSheet("""
+        * {
+            font-size: 14px;
+        }
+    """)
     mainWindow = MyApp()
     mainWindow.show()
     sys.exit(app.exec())
