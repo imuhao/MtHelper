@@ -29,3 +29,17 @@ def add_shop(shopName,shopClloke):
     # 保存修改
     with open('./config/config.ini', 'w',encoding='utf-8') as configfile:
         config.write(configfile)
+
+
+
+def get_purchase_list():
+    config.read('./config/config.ini',encoding='utf-8')
+    # 获取"阿芬迪采购"下的数据
+    optoion_name = "阿芬迪采购"
+    
+    purchase_list = []
+    for option in config.options(optoion_name):
+        shop_info = {"name":option,"cookie":config.get(optoion_name, option)}
+        purchase_list.append(shop_info)
+
+    return purchase_list

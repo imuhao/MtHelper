@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>996</width>
-    <height>504</height>
+    <width>1001</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="font">
@@ -19,79 +19,266 @@
    <string>美团辅助</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTableWidget" name="tableWidget">
+   <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>981</width>
-      <height>421</height>
+      <width>1001</width>
+      <height>511</height>
      </rect>
     </property>
-    <column>
-     <property name="text">
-      <string>店铺名称</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>今日营业额</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>营业额环比</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>营业额排名</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>成交单量</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>单量环比</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>订单均价</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>退款金额</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>退款金额环比</string>
-     </property>
-    </column>
-   </widget>
-   <widget class="QLabel" name="amountCount">
-    <property name="geometry">
-     <rect>
-      <x>770</x>
-      <y>432</y>
-      <width>211</width>
-      <height>21</height>
-     </rect>
+    <property name="currentIndex">
+     <number>0</number>
     </property>
-    <property name="layoutDirection">
-     <enum>Qt::RightToLeft</enum>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>店铺数据</string>
+     </attribute>
+     <widget class="QTableWidget" name="tableWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>10</y>
+        <width>981</width>
+        <height>421</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>店铺名称</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>今日营业额</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>营业额环比</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>营业额排名</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>成交单量</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>单量环比</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>订单均价</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>退款金额</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>退款金额环比</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>440</y>
+        <width>341</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="btnRefreshData">
+         <property name="text">
+          <string>刷新数据</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="amountCount">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>采购数据</string>
+     </attribute>
+     <widget class="QTableWidget" name="purchaseTable">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>10</y>
+        <width>981</width>
+        <height>421</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>店铺名称</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>订单量</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>采购时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>下单时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>订单金额</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>采购成本</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>利润</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>利润率</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>680</x>
+        <y>440</y>
+        <width>301</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QPushButton" name="btnRefreshPurchaseData">
+         <property name="text">
+          <string>刷新数据</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelPurchase">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>440</y>
+        <width>206</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QRadioButton" name="rbPurchase">
+         <property name="text">
+          <string>采购时间</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="rbPlace">
+         <property name="text">
+          <string>下单时间</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_4">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>440</y>
+        <width>428</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>开始日期</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateEdit" name="dateStart">
+         <property name="calendarPopup">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>结束日期</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateEdit" name="dateEnd">
+         <property name="calendarPopup">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -99,30 +286,12 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>996</width>
+     <width>1001</width>
      <height>30</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>功能</string>
-    </property>
-    <addaction name="addshop"/>
-    <addaction name="refreshshop"/>
-   </widget>
-   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="addshop">
-   <property name="text">
-    <string>添加店铺</string>
-   </property>
-  </action>
-  <action name="refreshshop">
-   <property name="text">
-    <string>更新数据</string>
-   </property>
-  </action>
  </widget>
  <resources/>
  <connections/>

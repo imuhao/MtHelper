@@ -17,15 +17,13 @@ class MyApp(QtWidgets.QMainWindow):
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.threadpool = QtCore.QThreadPool()
-        self.threadpool.setMaxThreadCount(3)
         self.apply_stylesheet()
         self.setup_table_widget()
 
 
         self.requestData = RequestData()
-        self.requestData.request_data(self.data_load_callback)
 
+        self.requestData.request_data(self.data_load_callback)
 
     def apply_stylesheet(self):
         QtWidgets.QApplication.setStyle("Fusion")
@@ -42,7 +40,9 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui.tableWidget.setColumnCount(9)
         self.ui.tableWidget.setRowCount(0)  # 初始行数为0，可以根据需要调整
         
-        
+        # self.ui.purchaseTable.setColumnCount(6)
+        # self.ui.purchaseTable.setRowCount(0)  # 初始行数为0，可以根据需要调整
+
 
         self.ui.tableWidget.setColumnWidth(Contants.index_name, 160)
         self.ui.tableWidget.setColumnWidth(Contants.index_deal_amount_value, 100)
@@ -54,16 +54,46 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui.tableWidget.setColumnWidth(Contants.index_refund_amount_value, 100)
         self.ui.tableWidget.setColumnWidth(Contants.index_refund_relative_cycle, 100)
 
-        self.ui.addshop.triggered.connect(self.add_shop)
-        self.ui.refreshshop.triggered.connect(self.refresh_data)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_shop_name, 160)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_order_number, 80)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_add_time, 160)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_order_time, 160)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_turnover, 100)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_cost, 100)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_profit, 100)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_profit_margin, 100)
 
-    def add_shop(self):
-        pass
 
-    def refresh_data(self):
+        self.ui.btnRefreshData.clicked.connect(self.refresh_shop_data)
+        self.ui.btnRefreshPurchaseData.clicked.connect(self.refresh_purchase_data)
+        # 连接信号
+        self.ui.tabWidget.currentChanged.connect(self.on_tab_changed)
+
+        
+
+    def on_tab_changed(self, index):
+        if index == 0:
+            self.refresh_shop_data()
+        elif index ==1:
+            self.ui.dateStart.setDate(QDate.currentDate())
+            self.ui.dateEnd.setDate(QDate.currentDate())
+            self.refresh_purchase_data()
+
+
+
+    def refresh_shop_data(self):
         self.ui.tableWidget.setSortingEnabled(False)
         self.ui.tableWidget.setRowCount(0)
         self.requestData.request_data(self.data_load_callback)
+
+
+    def refresh_purchase_data(self):
+        self.ui.purchaseTable.setSortingEnabled(True)
+        isSelectPurchaseTime = self.ui.rbPurchase.isChecked()
+        dateStart = self.ui.dateStart.date().toString(Qt.DateFormat.ISODate)
+        dateEnd = self.ui.dateEnd.date().toString(Qt.DateFormat.ISODate)
+        self.ui.purchaseTable.setRowCount(0)
+        self.requestData.request_purchase_data(isSelectPurchaseTime,dateStart,dateEnd,self.data_load_purchase_callback)
 
     def data_load_callback(self,data,shopName):
         if data["code"] !=0:
@@ -147,22 +177,101 @@ class MyApp(QtWidgets.QMainWindow):
          # 判断是否所有任务已经完成
         active_threads = self.requestData.threadpool.activeThreadCount()
         if active_threads == 0:
-            print(str(self.ui.tableWidget.rowCount()))
             # 启用排序
             self.ui.tableWidget.setSortingEnabled(True)
             self.ui.tableWidget.sortItems(1, Qt.SortOrder.DescendingOrder)  # 按第二列（Amount 列）排序
-            self.calculate_total()
+            self.calculate_shop_total()
             
 
-    def calculate_total(self):
+    def calculate_shop_total(self):
         total = 0
         for row in range(self.ui.tableWidget.rowCount()):
             item = self.ui.tableWidget.item(row, Contants.index_deal_amount_value)
             if item is not None :
                 total += float(item.text())
 
-        self.ui.amountCount.setText(f'总营业额: {total:.2f}')
+        self.ui.amountCount.setText(f'今日营业额: {total:.2f}')
 
+    def data_load_purchase_callback(self,dataJson,shopName):
+        row_position = self.ui.purchaseTable.rowCount()
+        self.ui.purchaseTable.insertRow(row_position)
+        
+        #店铺名称
+        shopNameItem = QtWidgets.QTableWidgetItem(str(shopName))
+        self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_shop_name, shopNameItem)
+        
+        state = dataJson["success"]
+        if not state:
+            return
+        data = dataJson["data"]
+
+        pagination = data["pagination"]
+
+        #订单总数
+        total = pagination["total"]
+        orderNumberItem = QtWidgets.QTableWidgetItem(str(total))
+        self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_order_number, orderNumberItem)
+        
+        #最新一条订单
+        list = data["list"]
+        if list == None:
+            return
+        
+        firstOrder = list[0]
+
+        #采购时间
+        addTime = firstOrder["addTime"]
+        addTimeItem = QtWidgets.QTableWidgetItem(str(addTime))
+        self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_add_time, addTimeItem)
+
+        #订单时间
+        orderTime = firstOrder["orderTime"]
+        orderTimeItem = QtWidgets.QTableWidgetItem(str(orderTime))
+        self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_order_time, orderTimeItem)
+
+        paymentTotal = 0.0
+        purchPaymentTotal = 0.0
+        profitTotal = 0.0
+        
+        for item in list:
+            paymentTotal+=item["payment"]
+            purchPaymentTotal+=item["purchPayment"]
+            profitTotal+=item["profit"]
+
+        #采购营业额
+        paymentTotalItem = QtWidgets.QTableWidgetItem(f'{paymentTotal:.2f}')
+        self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_turnover, paymentTotalItem)
+
+        #采购成本
+        purchPaymentTotalItem = QtWidgets.QTableWidgetItem(f'{purchPaymentTotal:.2f}')
+        self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_cost, purchPaymentTotalItem)
+
+        #采购利润
+        profitTotalItem = QtWidgets.QTableWidgetItem(f'{profitTotal:.2f}')
+        self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_profit, profitTotalItem)
+
+        #利润率 
+        profitMargin =  "{:.2f}%".format(profitTotal/paymentTotal*100)
+        profitMarginItem = QtWidgets.QTableWidgetItem(profitMargin)
+        self.ui.purchaseTable.setItem(row_position, Contants.index_profit_margin, profitMarginItem)
+
+
+         # 判断是否所有任务已经完成
+        active_threads = self.requestData.threadpool.activeThreadCount()
+        if active_threads == 0:
+            # 启用排序
+            self.calculate_profit_total()
+
+        
+
+    def calculate_profit_total(self):
+        total = 0
+        for row in range(self.ui.purchaseTable.rowCount()):
+            item = self.ui.purchaseTable.item(row, Contants.index_purchase_profit)
+            if item is not None :
+                total += float(item.text())
+
+        self.ui.labelPurchase.setText(f'总利润: {total:.2f}')
 
 
 if __name__ == "__main__":
