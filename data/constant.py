@@ -32,7 +32,8 @@ class Contants:
       index_purchase_order_number =1 #订单数
       index_purchase_add_time = 2 #采购时间
       index_purchase_order_time = 3 #订单时间
-      index_purchase_turnover =4 #采购营业额
-      index_purchase_cost =5 #采购成本
-      index_purchase_profit = 6 #采购利润
-      index_profit_margin = 7 #利润率
+      index_purchase_turnover =4 #订单金额
+      index_estimated_revenue=5 #预计收入
+      index_purchase_cost =6 #采购成本
+      index_purchase_profit = 7 #采购利润
+      index_profit_margin = 8 #利润率

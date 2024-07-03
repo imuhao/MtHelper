@@ -7,6 +7,7 @@ from PyQt6.QtCore import QDate,QFileSystemWatcher,Qt
 import urllib3
 from data.request_data import RequestData
 from data.constant import Contants
+import qdarkstyle
 
 class MyApp(QtWidgets.QMainWindow):
 
@@ -44,8 +45,8 @@ class MyApp(QtWidgets.QMainWindow):
         # self.ui.purchaseTable.setRowCount(0)  # 初始行数为0，可以根据需要调整
 
 
-        self.ui.tableWidget.setColumnWidth(Contants.index_name, 160)
-        self.ui.tableWidget.setColumnWidth(Contants.index_deal_amount_value, 100)
+        self.ui.tableWidget.setColumnWidth(Contants.index_name, 200)
+        self.ui.tableWidget.setColumnWidth(Contants.index_deal_amount_value, 200)
         self.ui.tableWidget.setColumnWidth(Contants.index_deal_relative_cycle, 100)
         self.ui.tableWidget.setColumnWidth(Contants.index_deal_ranking_interval, 100)
         self.ui.tableWidget.setColumnWidth(Contants.index_transaction_turnover, 100)
@@ -55,21 +56,29 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui.tableWidget.setColumnWidth(Contants.index_refund_relative_cycle, 100)
 
         self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_shop_name, 160)
-        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_order_number, 80)
-        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_add_time, 160)
-        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_order_time, 160)
-        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_turnover, 100)
-        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_cost, 100)
-        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_profit, 100)
-        self.ui.purchaseTable.setColumnWidth(Contants.index_profit_margin, 100)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_order_number, 70)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_add_time, 155)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_order_time, 155)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_turnover, 85)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_estimated_revenue, 85)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_cost, 85)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_profit, 85)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_profit_margin, 85)
 
 
         self.ui.btnRefreshData.clicked.connect(self.refresh_shop_data)
         self.ui.btnRefreshPurchaseData.clicked.connect(self.refresh_purchase_data)
         # 连接信号
         self.ui.tabWidget.currentChanged.connect(self.on_tab_changed)
+        self.ui.btnClose.clicked.connect(self.on_close)
+        self.ui.btnMini.clicked.connect(self.on_mini)
+    
 
-        
+    def on_close(self):
+        self.close()
+    
+    def on_mini(self):
+        self.showMinimized()
 
     def on_tab_changed(self, index):
         if index == 0:
@@ -88,11 +97,11 @@ class MyApp(QtWidgets.QMainWindow):
 
 
     def refresh_purchase_data(self):
-        self.ui.purchaseTable.setSortingEnabled(True)
+        self.ui.purchaseTable.setSortingEnabled(False)
+        self.ui.purchaseTable.setRowCount(0)
         isSelectPurchaseTime = self.ui.rbPurchase.isChecked()
         dateStart = self.ui.dateStart.date().toString(Qt.DateFormat.ISODate)
         dateEnd = self.ui.dateEnd.date().toString(Qt.DateFormat.ISODate)
-        self.ui.purchaseTable.setRowCount(0)
         self.requestData.request_purchase_data(isSelectPurchaseTime,dateStart,dateEnd,self.data_load_purchase_callback)
 
     def data_load_callback(self,data,shopName):
@@ -179,7 +188,7 @@ class MyApp(QtWidgets.QMainWindow):
         if active_threads == 0:
             # 启用排序
             self.ui.tableWidget.setSortingEnabled(True)
-            self.ui.tableWidget.sortItems(1, Qt.SortOrder.DescendingOrder)  # 按第二列（Amount 列）排序
+            self.ui.tableWidget.sortItems(Contants.index_deal_amount_value, Qt.SortOrder.DescendingOrder)  # 按第二列（Amount 列）排序
             self.calculate_shop_total()
             
 
@@ -214,7 +223,7 @@ class MyApp(QtWidgets.QMainWindow):
         
         #最新一条订单
         list = data["list"]
-        if list == None:
+        if list == None or len(list)==0:
             return
         
         firstOrder = list[0]
@@ -230,28 +239,33 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_order_time, orderTimeItem)
 
         paymentTotal = 0.0
+        estimatedRevenueTotal = 0.0
         purchPaymentTotal = 0.0
         profitTotal = 0.0
         
+        
         for item in list:
             paymentTotal+=item["payment"]
+            estimatedRevenueTotal+=item["itemSellerPrice"]
             purchPaymentTotal+=item["purchPayment"]
             profitTotal+=item["profit"]
 
         #采购营业额
         paymentTotalItem = QtWidgets.QTableWidgetItem(f'{paymentTotal:.2f}')
         self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_turnover, paymentTotalItem)
-
+        #预计收入
+        estimatedRevenueItem = QtWidgets.QTableWidgetItem(f'{estimatedRevenueTotal:.2f}')
+        self.ui.purchaseTable.setItem(row_position, Contants.index_estimated_revenue, estimatedRevenueItem)
         #采购成本
         purchPaymentTotalItem = QtWidgets.QTableWidgetItem(f'{purchPaymentTotal:.2f}')
         self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_cost, purchPaymentTotalItem)
 
         #采购利润
-        profitTotalItem = QtWidgets.QTableWidgetItem(f'{profitTotal:.2f}')
+        profitTotalItem = NumericTableWidgetItem(f'{profitTotal:.2f}')
         self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_profit, profitTotalItem)
 
         #利润率 
-        profitMargin =  "{:.2f}%".format(profitTotal/paymentTotal*100)
+        profitMargin =  "{:.2f}%".format(profitTotal/estimatedRevenueTotal*100)
         profitMarginItem = QtWidgets.QTableWidgetItem(profitMargin)
         self.ui.purchaseTable.setItem(row_position, Contants.index_profit_margin, profitMarginItem)
 
@@ -260,6 +274,8 @@ class MyApp(QtWidgets.QMainWindow):
         active_threads = self.requestData.threadpool.activeThreadCount()
         if active_threads == 0:
             # 启用排序
+            self.ui.purchaseTable.setSortingEnabled(True)
+            self.ui.purchaseTable.sortItems(Contants.index_purchase_profit, Qt.SortOrder.DescendingOrder) 
             self.calculate_profit_total()
 
         
@@ -283,5 +299,8 @@ if __name__ == "__main__":
         }
     """)
     mainWindow = MyApp()
+    mainWindow.setWindowOpacity(0.9) # 设置窗口透明度
+    mainWindow.setWindowFlag(Qt.WindowType.FramelessWindowHint)
+    mainWindow.setStyleSheet(qdarkstyle.load_stylesheet())
     mainWindow.show()
     sys.exit(app.exec())
