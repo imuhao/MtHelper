@@ -267,8 +267,8 @@ class MyApp(QtWidgets.QMainWindow):
 
         #采购利润
         profitTotalItem = NumericTableWidgetItem(f'{profitTotal:.2f}')
+        profitTotalItem.setForeground(Qt.GlobalColor.red)
         self.ui.purchaseTable.setItem(row_position, Contants.index_purchase_profit, profitTotalItem)
-
         #利润率 
         profitMargin =  "{:.2f}%".format(profitTotal/estimatedRevenueTotal*100)
         profitMarginItem = QtWidgets.QTableWidgetItem(profitMargin)
