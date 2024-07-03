@@ -37,3 +37,19 @@ class Contants:
       index_purchase_cost =6 #采购成本
       index_purchase_profit = 7 #采购利润
       index_profit_margin = 8 #利润率
+
+
+
+      #订单数据
+      index_order_view = 0 #订单号 
+      index_order_goods_name = 1 #商品名称
+      index_order_create_time = 2 #订单创建时间  
+      index_order_status = 3 #订单状态 
+      index_order_goods_count = 4 #下单数量  medicinePricetItem
+      index_order_goods_price = 5 #购买单价
+      index_order_total_price = 6 #下单总金额
+      index_order_recipient_name = 7 #收货人
+      index_order_recipient_phone = 8 #收货电话
+      index_order_recipient_address = 9 #收货地址
+      index_order_recipient_source = 10 #下单渠道  
+      index_order_brushing = 11 #是否刷单

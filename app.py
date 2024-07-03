@@ -1,5 +1,5 @@
 import sys
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore,QtGui
 from ui.ui import Ui_MainWindow
 from ui.number_widget import NumericTableWidgetItem
 from datetime import datetime, timedelta
@@ -19,12 +19,13 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.apply_stylesheet()
-        self.setup_table_widget()
-
+        self.setup_widget()
 
         self.requestData = RequestData()
+        self.refresh_shop_data()
+        self.mouse_pos = None
 
-        self.requestData.request_data(self.data_load_callback)
+        self.requestData.request_order_data(self.order_data_load_call)
 
     def apply_stylesheet(self):
         QtWidgets.QApplication.setStyle("Fusion")
@@ -35,15 +36,10 @@ class MyApp(QtWidgets.QMainWindow):
         # 发起请求时忽略证书验证警告
         urllib3.disable_warnings()
 
-    def setup_table_widget(self):
+    def setup_widget(self):
         """设置表格控件"""
         header = self.ui.tableWidget.horizontalHeader()
         self.ui.tableWidget.setColumnCount(9)
-        self.ui.tableWidget.setRowCount(0)  # 初始行数为0，可以根据需要调整
-        
-        # self.ui.purchaseTable.setColumnCount(6)
-        # self.ui.purchaseTable.setRowCount(0)  # 初始行数为0，可以根据需要调整
-
 
         self.ui.tableWidget.setColumnWidth(Contants.index_name, 200)
         self.ui.tableWidget.setColumnWidth(Contants.index_deal_amount_value, 200)
@@ -72,8 +68,15 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui.tabWidget.currentChanged.connect(self.on_tab_changed)
         self.ui.btnClose.clicked.connect(self.on_close)
         self.ui.btnMini.clicked.connect(self.on_mini)
-    
+        
+        #下拉选择框监听
+        self.ui.cbShop.currentTextChanged.connect(self.selectionShopChanged)
 
+
+    #店铺下拉选择监听回调
+    def selectionShopChanged(self,optoion):
+        self.refresh_shop_data()
+    
     def on_close(self):
         self.close()
     
@@ -89,13 +92,14 @@ class MyApp(QtWidgets.QMainWindow):
             self.refresh_purchase_data()
 
 
-
+    #刷新店铺数据
     def refresh_shop_data(self):
         self.ui.tableWidget.setSortingEnabled(False)
         self.ui.tableWidget.setRowCount(0)
-        self.requestData.request_data(self.data_load_callback)
+        selectedShop = self.ui.cbShop.currentText()
+        self.requestData.request_shop_data(selectedShop,self.home_data_load_callback)
 
-
+    #刷新采购数据
     def refresh_purchase_data(self):
         self.ui.purchaseTable.setSortingEnabled(False)
         self.ui.purchaseTable.setRowCount(0)
@@ -104,7 +108,95 @@ class MyApp(QtWidgets.QMainWindow):
         dateEnd = self.ui.dateEnd.date().toString(Qt.DateFormat.ISODate)
         self.requestData.request_purchase_data(isSelectPurchaseTime,dateStart,dateEnd,self.data_load_purchase_callback)
 
-    def data_load_callback(self,data,shopName):
+    def order_data_load_call(self,dataJson):
+        code = dataJson["code"]
+        if code !=0:
+            return
+        data = dataJson["data"]
+        #今日订单数
+        todayOrdertotal = data["total"]
+        print("今日订单数："+str(todayOrdertotal))
+
+        contentList = data["content"]
+        for content in contentList:
+
+            row_position = self.ui.tableOrder.rowCount()
+            self.ui.tableOrder.insertRow(row_position)
+
+
+            orderResult = content["orderResult"]
+
+            warehouseGoodsList = content["warehouseGoodsList"]
+
+            #购买的第一个商品
+            warehouseGoods = warehouseGoodsList[0]
+            b2COrderDetailResult = warehouseGoods["b2COrderDetailResultList"][0]
+
+
+            #订单号
+            orderViewId = orderResult["orderViewId"]
+            orderViewIdItem = QtWidgets.QTableWidgetItem(str(orderViewId))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_view, orderViewIdItem)
+
+
+            #产品名称
+            goodsName = b2COrderDetailResult["goodsName"]
+            goodsNameItem = QtWidgets.QTableWidgetItem(str(goodsName))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_goods_name, goodsNameItem)  
+
+            # 下单时间
+            orderTime = orderResult["orderTime"]
+            orderTimeItem = QtWidgets.QTableWidgetItem(str(orderTime))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_create_time, orderTimeItem) 
+
+
+            #订单状态
+            b2cOrderMainStatusDesc = orderResult["b2cOrderMainStatusDesc"]
+            orderStatusItem = QtWidgets.QTableWidgetItem(str(b2cOrderMainStatusDesc))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_status, orderStatusItem) 
+
+            #购买数量
+            warehouseGoodsCount = warehouseGoods["warehouseGoodsCount"]
+            warehouseGoodsCountItem = QtWidgets.QTableWidgetItem(str(warehouseGoodsCount))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_goods_count, warehouseGoodsCountItem) 
+
+            #购买单价
+            medicinePrice = b2COrderDetailResult["medicinePrice"]
+            medicinePricetItem = QtWidgets.QTableWidgetItem(str(medicinePrice))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_goods_price, medicinePricetItem) 
+
+            #订单金额
+            totalPrice = orderResult["total"]
+            totalPriceItem = QtWidgets.QTableWidgetItem(str(totalPrice))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_total_price, totalPriceItem) 
+
+            #收货人
+            recipientName = orderResult["recipientName"]
+            recipientNameItem = QtWidgets.QTableWidgetItem(str(recipientName))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_recipient_name, recipientNameItem) 
+
+            #收获电话
+            recipientPhone = orderResult["recipientPhone"]
+            recipientPhoneItem = QtWidgets.QTableWidgetItem(str(recipientPhone))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_recipient_phone, recipientPhoneItem) 
+
+            #收获地址
+            recipientAddress = orderResult["recipientAddress"]
+            recipientAddressItem = QtWidgets.QTableWidgetItem(str(recipientAddress))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_recipient_address, recipientAddressItem) 
+
+            #下单渠道
+            orderSource = orderResult["orderSource"]
+            orderSourceItem = QtWidgets.QTableWidgetItem(str(orderSource))
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_recipient_source, orderSourceItem) 
+
+            #是否刷单
+            orderBrushingItem = QtWidgets.QTableWidgetItem("否")
+            self.ui.tableOrder.setItem(row_position, Contants.index_order_brushing, orderBrushingItem) 
+
+
+
+    def home_data_load_callback(self,data,shopName):
         if data["code"] !=0:
             return
         shopData = data["data"]
@@ -140,12 +232,10 @@ class MyApp(QtWidgets.QMainWindow):
         
         #营业额环比
         dealRelativeCycleItem = QtWidgets.QTableWidgetItem(str(dealRelativeCycle))
-
         if "-" in dealRelativeCycle: 
             dealRelativeCycleItem.setForeground(Qt.GlobalColor.green)
         else :
             dealRelativeCycleItem.setForeground(Qt.GlobalColor.red)
-
         self.ui.tableWidget.setItem(row_position, Contants.index_deal_relative_cycle, dealRelativeCycleItem)
         
         #营业额排名
@@ -297,6 +387,21 @@ class MyApp(QtWidgets.QMainWindow):
                 orderTotal+=int(item.text())
         self.ui.labelPurchase.setText(f'总订单：{orderTotal}  总利润: {profitTotal:.2f}')
 
+
+    def mousePressEvent(self, event):
+        # 鼠标按下时记录坐标
+        self.mouse_pos = event.globalPosition()
+ 
+    def mouseMoveEvent(self, event):
+        # 鼠标移动时计算移动距离
+        if self.mouse_pos:
+            diff = event.globalPosition() - self.mouse_pos
+            self.move(self.pos() + diff.toPoint())
+            self.mouse_pos = event.globalPosition()
+ 
+    def mouseReleaseEvent(self, event):
+        # 鼠标释放时清空坐标
+        self.mouse_pos = None
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
