@@ -55,7 +55,7 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui.tableWidget.setColumnWidth(Contants.index_refund_amount_value, 100)
         self.ui.tableWidget.setColumnWidth(Contants.index_refund_relative_cycle, 100)
 
-        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_shop_name, 160)
+        self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_shop_name, 200)
         self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_order_number, 70)
         self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_add_time, 155)
         self.ui.purchaseTable.setColumnWidth(Contants.index_purchase_order_time, 155)
@@ -193,13 +193,18 @@ class MyApp(QtWidgets.QMainWindow):
             
 
     def calculate_shop_total(self):
-        total = 0
+        turnoverTotal = 0
+        orderTotal = 0
         for row in range(self.ui.tableWidget.rowCount()):
             item = self.ui.tableWidget.item(row, Contants.index_deal_amount_value)
             if item is not None :
-                total += float(item.text())
+                turnoverTotal += float(item.text())
 
-        self.ui.amountCount.setText(f'今日营业额: {total:.2f}')
+            item = self.ui.tableWidget.item(row, Contants.index_transaction_turnover)
+            if item is not None :
+                orderTotal += int(item.text())
+
+        self.ui.amountCount.setText(f'总订单：{orderTotal}  营业额: {turnoverTotal:.2f}')
 
     def data_load_purchase_callback(self,dataJson,shopName):
         row_position = self.ui.purchaseTable.rowCount()
@@ -281,13 +286,16 @@ class MyApp(QtWidgets.QMainWindow):
         
 
     def calculate_profit_total(self):
-        total = 0
+        orderTotal = 0
+        profitTotal = 0
         for row in range(self.ui.purchaseTable.rowCount()):
             item = self.ui.purchaseTable.item(row, Contants.index_purchase_profit)
             if item is not None :
-                total += float(item.text())
-
-        self.ui.labelPurchase.setText(f'总利润: {total:.2f}')
+                profitTotal += float(item.text())
+            item = self.ui.purchaseTable.item(row, Contants.index_purchase_order_number)
+            if item is not None:
+                orderTotal+=int(item.text())
+        self.ui.labelPurchase.setText(f'总订单：{orderTotal}  总利润: {profitTotal:.2f}')
 
 
 if __name__ == "__main__":
