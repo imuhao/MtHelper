@@ -2,7 +2,7 @@ from PyQt6 import QtCore
 from PyQt6.QtCore import QRunnable
 import debugpy
 import requests
-from datetime import datetime
+from datetime import datetime,timedelta
 from utils import cookie_util
 import json
 
@@ -28,6 +28,22 @@ class ViolationDataWork(QRunnable):
 
 
     def fetch_data(self):
+
+
+        # 获取当前日期和时间
+        now = datetime.now()
+
+        # 今天23:59:59
+        end_of_today = datetime.combine(now.date(), datetime.max.time()).replace(hour=23, minute=59, second=59, microsecond=999999)
+
+        # 29天前的日期
+        twenty_nine_days_ago_date = now - timedelta(days=29)
+        start_of_twenty_nine_days_ago = datetime.combine(twenty_nine_days_ago_date.date(), datetime.min.time()).replace(hour=0, minute=0, second=0, microsecond=0)
+
+        # 转换为时间戳（精确到毫秒）
+        end_of_today_timestamp = int(end_of_today.timestamp() * 1000)
+        start_of_one_month_ago_timestamp = int(start_of_twenty_nine_days_ago.timestamp() * 1000)
+
         url = "https://yiyao.meituan.com/manage/mid/platform/business/violation/ticket/query/v2"
         params = {
             "acctId": cookie_util.get_mt_cookie_acctId(self.cookie),
@@ -35,8 +51,8 @@ class ViolationDataWork(QRunnable):
             "bsid": cookie_util.get_mt_cookie_bsid(self.cookie),
             "poiId": cookie_util.get_mt_cookie_wmPoiId(self.cookie),
             "appType": "3",
-            "createStartTime": "1717516800000",
-            "createEndTime": "1720108799999",
+            "createStartTime": start_of_one_month_ago_timestamp,
+            "createEndTime": end_of_today_timestamp,
             "appealStatusList": "[1,3]",
             "pageNo": "1",
             "pageSize": "10",

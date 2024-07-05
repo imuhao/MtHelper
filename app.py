@@ -1,17 +1,17 @@
 import sys
 from PyQt6 import QtWidgets, QtCore,QtGui
-from PyQt6.QtWidgets import QLabel,QFileDialog,QTreeWidgetItem
+from PyQt6.QtWidgets import QLabel,QFileDialog,QTreeWidgetItem,QMessageBox,  QMenu,QTableWidgetItem
+from PyQt6.QtCore import QDate,QFileSystemWatcher,Qt,QDateTime,QTimer
+from PyQt6.QtGui import QStandardItemModel, QStandardItem,QPixmap,QAction
 from ui.ui import Ui_MainWindow
 from ui.number_widget import NumericTableWidgetItem
 from datetime import datetime, timedelta
-from PyQt6.QtCore import QDate,QFileSystemWatcher,Qt,QDateTime,QTimer
-from PyQt6.QtGui import QStandardItemModel, QStandardItem
 import urllib3
 from data.request_data import RequestData
 from data.constant import Contants
 import qdarkstyle
 from config import config
-from openpyxl import Workbook
+from openpyxl import Workbook,load_workbook
 from utils import cookie_util
 
 class MyApp(QtWidgets.QMainWindow):
@@ -80,6 +80,10 @@ class MyApp(QtWidgets.QMainWindow):
         self.ui.btnExportOrder.clicked.connect(self.on_order_export_click_listener)
         #下拉选择框监听
         self.ui.cbShop.currentTextChanged.connect(self.selectionShopChanged)
+        #替换主图选择文件
+        self.ui.btnSelectFile.clicked.connect(self.on_goddes_pic_select_file_click_listener)
+        #替换主题开始添加按钮
+        self.ui.btnStartAddPic.clicked.connect(self.on_goddess_add_pic_click_listener)
 
         #设置订单查询下拉框时间
         # 获取当前时间
@@ -115,8 +119,117 @@ class MyApp(QtWidgets.QMainWindow):
         self.statusLabel = QLabel()
         self.statusbar.addWidget(self.statusLabel)
 
+        #创建主图替换的右键菜单
+        self.create_pic_context_menu()
+
+    #主图加水印开始按钮点击事件
+    def on_goddess_add_pic_click_listener(self):
+        for row in range(self.ui.tableSkuidPic.rowCount()):
+            item = self.ui.tableSkuidPic.item(row, 0)
+            if item:
+                print(item.text())
+                file_path = self.ui.editSelectFile.text()
+                skuid = item.text()
+                self.requestData.request_revise_goddess_pic(skuid,row,file_path,self.goddess_add_pic_callback)
+
+    #主图加水印回调
+    def goddess_add_pic_callback(self,index,result,result_msg):
+        item = QTableWidgetItem(result_msg)
+        self.ui.tableSkuidPic.setItem(index, 1, item)
 
 
+    #替换主图选择文件
+    def on_goddes_pic_select_file_click_listener(self):
+        file_dialog = QFileDialog(self)
+        file_dialog.setNameFilter("PNG图片 (*.png*)")  # 设置文件过滤器
+        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)  # 设置文件选择模式为选择现有文件
+
+        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
+            selected_files = file_dialog.selectedFiles()
+            if selected_files:
+                file_path = selected_files[0]
+                self.ui.editSelectFile.setText(f"{file_path}")
+                self.show_select_pic_file(file_path)
+    
+    #显示加载到封面的边框图片
+    def show_select_pic_file(self,file_path):
+        # 加载本地图片
+        pixmap = QPixmap(file_path)  # 替换为你的图片路径
+        self.ui.imageSelectPic.setPixmap(pixmap)
+        self.ui.imageSelectPic.setScaledContents(True)
+
+    #创建边框Table的右键按钮
+    def create_pic_context_menu(self):
+        self.context_menu = QMenu(self)
+
+        # 添加导入动作
+        import_action = QAction("导入表格", self)
+        import_action.triggered.connect(self.import_table)
+        self.context_menu.addAction(import_action)
+
+        # 添加导出动作
+        export_action = QAction("导出表格", self)
+        export_action.triggered.connect(self.export_table)
+        self.context_menu.addAction(export_action)
+
+        # 将右键菜单与表格关联
+        self.ui.tableSkuidPic.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.ui.tableSkuidPic.customContextMenuRequested.connect(self.show_context_menu)
+
+    
+    #显示table 右键菜单
+    def show_context_menu(self, pos):
+        self.context_menu.exec(self.ui.tableSkuidPic.mapToGlobal(pos))
+
+    #导入添加封面的表格数据
+    def import_table(self):
+        file_dialog = QFileDialog(self)
+        file_dialog.setNameFilter("xlsx Files (*.xlsx);;All Files (*.*)")
+        file_dialog.setViewMode(QFileDialog.ViewMode.List)
+        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
+            file_path = file_dialog.selectedFiles()[0]
+            # 在此处实现导入逻辑，例如从 CSV 文件读取数据并更新 QTableWidget
+            # 打开 Excel 文件
+            wb = load_workbook(filename=file_path)
+            sheet = wb.active
+
+            # 清空 QTableWidget
+            self.ui.tableSkuidPic.clearContents()
+            self.ui.tableSkuidPic.setRowCount(0)
+
+            # 读取 Excel 数据并加载到 QTableWidget 中
+            for row in sheet.iter_rows(values_only=True):
+                row_position = self.ui.tableSkuidPic.rowCount()
+                self.ui.tableSkuidPic.insertRow(row_position)
+                for col, value in enumerate(row):
+                    item = QTableWidgetItem(str(value))
+                    self.ui.tableSkuidPic.setItem(row_position, col, item)
+            QMessageBox.information(self, "导入成功", f"从文件 {file_path} 导入表格成功！")
+
+    #导出添加封面的表格数据
+    def export_table(self):
+        file_dialog = QFileDialog(self)
+        file_dialog.setDefaultSuffix("xlsx")
+        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        file_dialog.setNameFilter("xlsx Files (*.xlsx)")
+        if file_dialog.exec() == QFileDialog.DialogCode.Accepted:
+            file_path = file_dialog.selectedFiles()[0]
+            # 在此处实现导出逻辑，例如将 QTableWidget 中的数据写入到 CSV 文件中
+            # 创建一个新的 Excel 工作簿
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Table Data"
+
+            # 从 QTableWidget 中读取数据并写入 Excel
+            for row in range(self.ui.tableSkuidPic.rowCount()):
+                for col in range(self.ui.tableSkuidPic.columnCount()):
+                    item = self.ui.tableSkuidPic.item(row, col)
+                    if item is not None:
+                        ws.cell(row=row + 1, column=col + 1, value=str(item.text()))
+
+            # 保存 Excel 文件
+            wb.save(file_path)
+            QMessageBox.information(self, "导出成功", f"表格成功导出到文件 {file_path}！")
 
     #更新状态栏消息
     def update_status(self, message):

@@ -1,6 +1,7 @@
 from PyQt6 import QtCore
 from config import config
 from worker.home_data_work import HomeDataWork
+from worker.picture_data_work import  ImageWatermarkWork
 from worker.purchase_data_work import PurchaseDataWork
 from worker.order_data_work import OrderDataWork
 from worker.violation_data_work import TransactionDataWork, ViolationDataWork
@@ -62,3 +63,10 @@ class RequestData:
             transactionDataWork = TransactionDataWork(cookie)
             transactionDataWork.signals.finished.connect(callback)
             self.threadpool2.start(transactionDataWork)
+    
+    #修改主图封面
+    def request_revise_goddess_pic(self,skuid,index,filepath,callback):
+        cookie = config.get_shop_cookie("丰安健康旗舰店")
+        gooddsInfoWork = ImageWatermarkWork(cookie,skuid,index,filepath)
+        gooddsInfoWork.signals.finished.connect(callback)
+        self.threadpool.start(gooddsInfoWork)
